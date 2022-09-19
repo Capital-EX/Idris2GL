@@ -30,14 +30,20 @@ display window bgColor pic  =  do
     renderClear                ren
     loadPicture                pic ren win
     renderPresent              ren
+    updateWinSur               win
     e                       <- newEve
-    loop                       e
+    loop                       pic ren win bgColor e
 
     closeWin                   win
     freeEve e
     freeRender                 ren
 
-    where loop : Event -> IO ()
-          loop     e with (eveType e)
-              loop _ | E_QUIT = pure ()
-              loop e | _      = loop e
+    where loop : Picture -> Renderer -> Win -> Color -> Event -> IO ()
+          loop pic ren win bgColor e with (eveType e)
+              loop _   _   _   _ _       | E_QUIT = pure ()
+              loop pic ren win bgColor e | _      = 
+                    do setRenderDrawColor ren bgColor
+                       renderClear        ren 
+                       loadPicture        pic ren win
+                       renderPresent      ren
+                       loop               pic ren win bgColor e
