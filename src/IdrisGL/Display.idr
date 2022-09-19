@@ -3,6 +3,7 @@
 ||| Display a picture in window.
 module IdrisGL.Display
 
+import System
 import IdrisGL.Picture
 import IdrisGL.DataType
 import IdrisGL.Color
@@ -46,4 +47,5 @@ display window bgColor pic  =  do
                        renderClear        ren 
                        loadPicture        pic ren win
                        renderPresent      ren
+                       usleep             1000000
                        loop               pic ren win bgColor e
