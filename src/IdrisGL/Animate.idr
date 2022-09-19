@@ -32,20 +32,21 @@ animate window bgColor tps picF = do
     closeWin                    win
     freeEve                     e
     freeRender                  ren
-    where mutual
-        loop : Renderer -> Win -> Event -> Double -> IO ()
-        loop ren win e lastTime =
-            if   !getSecondsTicks - lastTime < tps
-            then loop'          ren win e lastTime
-            else do
-            setRenderDrawColor  ren bgColor
-            renderClear         ren
-            loadPicture         (picF !getSecondsTicks) ren win
-            renderPresent       ren
-            loop'               ren win e !getSecondsTicks
+    where 
+       mutual
+            loop : Renderer -> Win -> Event -> Double -> IO ()
+            loop ren win e lastTime =
+                if   !getSecondsTicks - lastTime < tps
+                then loop'          ren win e lastTime
+                else do
+                setRenderDrawColor  ren bgColor
+                renderClear         ren
+                loadPicture         (picF !getSecondsTicks) ren win
+                renderPresent       ren
+                loop'               ren win e !getSecondsTicks
 
-        loop' : Renderer -> Win -> Event -> Double -> IO ()
-        loop'     ren win e lastTime with (eveType e)
-            loop' _   _   _ _        | E_QUIT = pure ()
-            loop' ren win e lastTime | _      = loop ren win e lastTime
+            loop' : Renderer -> Win -> Event -> Double -> IO ()
+            loop'     ren win e lastTime with (eveType e)
+                loop' _   _   _ _        | E_QUIT = pure ()
+                loop' ren win e lastTime | _      = loop ren win e lastTime
             
