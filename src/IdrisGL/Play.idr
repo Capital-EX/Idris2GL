@@ -91,24 +91,24 @@ playStateT window bgColor tpf state w2p e2w t2w = do
     freeEve                  e
     freeRender               ren
 where 
-  mutual
-      loop : a -> Renderer -> Win -> Event -> Double -> IO ()
-      loop st ren win e lastTime =
-        if   !getSecondsTicks - lastTime < tpf
-        then loop'           st ren win e lastTime
-        else do
-          setRenderDrawColor ren bgColor
-          renderClear        ren
-          (st, pics)      <- runStateT st w2p
-          loadPicture        pics ren win
-          renderPresent      ren
-          currT           <- getSecondsTicks
-          st              <- execStateT st (t2w currT)
-          loop'              st ren win e currT
+    mutual
+        loop : a -> Renderer -> Win -> Event -> Double -> IO ()
+        loop st ren win e lastTime =
+          if   !getSecondsTicks - lastTime < tpf
+          then loop'           st ren win e lastTime
+          else do
+            setRenderDrawColor ren bgColor
+            renderClear        ren
+            (st, pics)      <- runStateT st w2p
+            loadPicture        pics ren win
+            renderPresent      ren
+            currT           <- getSecondsTicks
+            st              <- execStateT st (t2w currT)
+            loop'              st ren win e currT
 
-      loop' : a -> Renderer -> Win -> Event -> Double -> IO ()
-      loop'   st ren win e lastTime with (eveType e)
-        loop' _  _   _   _ _        | E_QUIT = pure ()
-        loop' st ren win e lastTime | other  = do
-          st              <- execStateT st (e2w other)
-          loop               st ren win e lastTime
+        loop' : a -> Renderer -> Win -> Event -> Double -> IO ()
+        loop'   st ren win e lastTime with (eveType e)
+          loop' _  _   _   _ _        | E_QUIT = pure ()
+          loop' st ren win e lastTime | other  = do
+            st              <- execStateT st (e2w other)
+            loop               st ren win e lastTime

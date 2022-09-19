@@ -39,24 +39,25 @@ simulate window bgColor tps m m2p m2m = do
     closeWin                 win
     freeEve                  e
     freeRender               ren
-where mutual
-      loop : Renderer -> Win -> Event -> a -> Double -> IO ()
-      loop ren win e model lastTime = 
-        if   !getSecondsTicks - lastTime < tps
-        then loop'           ren win e model lastTime
-        else do
-          setRenderDrawColor ren bgColor
-          renderClear        ren
-          loadPicture        (m2p model) ren win
-          renderPresent      ren
-          currT           <- getSecondsTicks
-          let newM        =  m2m currT model
-          loop' ren win e newM currT
+where 
+    mutual
+        loop : Renderer -> Win -> Event -> a -> Double -> IO ()
+        loop ren win e model lastTime = 
+          if   !getSecondsTicks - lastTime < tps
+          then loop'           ren win e model lastTime
+          else do
+            setRenderDrawColor ren bgColor
+            renderClear        ren
+            loadPicture        (m2p model) ren win
+            renderPresent      ren
+            currT           <- getSecondsTicks
+            let newM        =  m2m currT model
+            loop' ren win e newM currT
 
-      loop' : Renderer -> Win -> Event -> a -> Double -> IO ()
-      loop'   ren win e m lastTime with (eveType e)
-        loop' _   _   _ _ _        | E_QUIT = pure ()
-        loop' ren win e m lastTime | _      = loop ren win e m lastTime
+        loop' : Renderer -> Win -> Event -> a -> Double -> IO ()
+        loop'   ren win e m lastTime with (eveType e)
+          loop' _   _   _ _ _        | E_QUIT = pure ()
+          loop' ren win e m lastTime | _      = loop ren win e m lastTime
 
 ||| Run a simulation with mutable state in a window.
 |||
@@ -84,22 +85,23 @@ simulateStateT window bgColor tps state m2p m2m = do
     closeWin                 win
     freeEve                  e
     freeRender               ren
-where mutual
-      loop : a -> Renderer -> Win -> Event -> Double -> IO ()
-      loop st ren win e lastTime = 
-        if   !getSecondsTicks - lastTime < tps
-        then loop'           st ren win e lastTime
-        else do
-          setRenderDrawColor ren bgColor
-          renderClear        ren
-          (st, pics)      <- runStateT st m2p
-          loadPicture        pics ren win
-          renderPresent      ren
-          currT           <- getSecondsTicks
-          st              <- execStateT st (m2m currT)
-          loop'              st ren win e currT
+where 
+    mutual
+        loop : a -> Renderer -> Win -> Event -> Double -> IO ()
+        loop st ren win e lastTime = 
+          if   !getSecondsTicks - lastTime < tps
+          then loop'           st ren win e lastTime
+          else do
+            setRenderDrawColor ren bgColor
+            renderClear        ren
+            (st, pics)      <- runStateT st m2p
+            loadPicture        pics ren win
+            renderPresent      ren
+            currT           <- getSecondsTicks
+            st              <- execStateT st (m2m currT)
+            loop'              st ren win e currT
 
-      loop' : a -> Renderer -> Win -> Event -> Double -> IO ()
-      loop'   st ren win e lastTime with (eveType e)
-        loop' _  _   _   _ _        | E_QUIT = pure ()
-        loop' st ren win e lastTime | _      = loop st ren win e lastTime
+        loop' : a -> Renderer -> Win -> Event -> Double -> IO ()
+        loop'   st ren win e lastTime with (eveType e)
+          loop' _  _   _   _ _        | E_QUIT = pure ()
+          loop' st ren win e lastTime | _      = loop st ren win e lastTime
